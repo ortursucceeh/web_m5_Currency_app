@@ -1,8 +1,7 @@
 import platform
-import aiohttp
-import asyncio
-import json
-import os
+import aiohttp, asyncio, aiofiles
+import json, os
+from aiopath import AsyncPath
 from pprint import pprint
 from time import time
 from datetime import datetime, timedelta
@@ -12,15 +11,15 @@ def create_dates() -> list[str]:
     if days > 10:
         days = days - days % 10
     today: datetime = datetime.today()
-    dates: list[str] = [(today - timedelta(days=i)).strftime('%d.%m.%Y') for i in range(days)]
-    return dates
+    return [(today - timedelta(days=i)).strftime('%d.%m.%Y') for i in range(days)]
+
 
 def get_currencies():
     currencies = input('Enter currencies (separated by space): ').split()
     return  [currency.upper().strip() for currency in currencies]
 
 
-def get_currencies_data(data: dict, searched_currencies: list[str]) -> dict:
+def get_currencies_data(data: dict, searched_currencies: list[str] = ('USD', 'EUR')) -> dict:
     currencies_data: list = [d for d in data['exchangeRate'] if d["currency"] in searched_currencies]
     all_currencies_info: dict = {}
     for currency, currency_data in zip(searched_currencies, currencies_data):
@@ -30,13 +29,13 @@ def get_currencies_data(data: dict, searched_currencies: list[str]) -> dict:
 
 
 def write_in_json(data: dict) -> None:
-    if os.path.exists('exchange_data.json'):
-        json_data: list = json.load(open('exchange_data.json'))
+    if os.path.exists('MainPart/exchange_data.json'):
+        json_data: list = json.load(open('MainPart/exchange_data.json'))
         json_data.append(data)
     else:
         json_data: list = [data]
 
-    with open('exchange_data.json', 'w') as file:
+    with open('MainPart/exchange_data.json', 'w') as file:
         json.dump(json_data, file, indent=2)
 
 
